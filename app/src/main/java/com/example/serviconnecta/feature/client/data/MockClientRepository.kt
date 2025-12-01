@@ -251,7 +251,7 @@ object MockClientRepository {
             last4 = "2259",
             expiryMonth = 12,
             expiryYear = 2026,
-            cardholderName = "Ricardo Morales"
+            cardholderName = null
         )
     )
 
@@ -314,18 +314,33 @@ object MockClientRepository {
         return Result.success(mockCategories)
     }
 
+    private fun String.normalizeForComparison(): String {
+        return this.lowercase()
+            .replace("á", "a")
+            .replace("é", "e")
+            .replace("í", "i")
+            .replace("ó", "o")
+            .replace("ú", "u")
+            .replace("ñ", "n")
+    }
+
     suspend fun getServices(category: String? = null, search: String? = null): Result<List<ServiceItem>> {
         delay(500)
         var filtered = mockServices
 
         if (!category.isNullOrBlank()) {
-            filtered = filtered.filter { it.category.equals(category, ignoreCase = true) }
+            val normalizedCategory = category.normalizeForComparison()
+            filtered = filtered.filter {
+                it.category.normalizeForComparison() == normalizedCategory ||
+                it.category.normalizeForComparison().contains(normalizedCategory)
+            }
         }
 
         if (!search.isNullOrBlank()) {
             filtered = filtered.filter {
                 it.title.contains(search, ignoreCase = true) ||
-                it.description.contains(search, ignoreCase = true)
+                it.description.contains(search, ignoreCase = true) ||
+                it.category.contains(search, ignoreCase = true)
             }
         }
 
@@ -387,7 +402,7 @@ object MockClientRepository {
             date = date,
             time = time,
             location = location.address,
-            status = BookingStatus.CONFIRMED,
+            status = BookingStatus.PENDING,
             total = service.price,
             discount = 0.0,
             paymentMethod = when(payment.type) {
@@ -418,6 +433,28 @@ object MockClientRepository {
             return Result.success(updated)
         }
         return Result.failure(Exception("Booking not found"))
+    }
+
+    suspend fun getBookingById(bookingId: String): Result<Booking> {
+        delay(300)
+        val booking = mockBookings.find { it.id == bookingId }
+        return if (booking != null) {
+            Result.success(booking)
+        } else {
+            Result.failure(Exception("Booking not found"))
+        }
+    }
+
+    suspend fun submitReview(bookingId: String, rating: Int, comment: String): Result<Boolean> {
+        delay(700)
+        val bookingIndex = mockBookings.indexOfFirst { it.id == bookingId }
+        if (bookingIndex == -1) {
+            return Result.failure(Exception("Booking not found"))
+        }
+
+        // En un app real, aquí se enviaría la reseña al backend
+        // Por ahora solo simulamos el éxito
+        return Result.success(true)
     }
 
     suspend fun getLocations(): Result<List<Location>> {

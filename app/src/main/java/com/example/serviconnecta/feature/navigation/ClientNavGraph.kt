@@ -12,10 +12,12 @@ import com.example.serviconnecta.feature.client.ui.booking.SelectDateTimeScreen
 import com.example.serviconnecta.feature.client.ui.home.ClientHomeScreen
 import com.example.serviconnecta.feature.client.ui.profile.ClientProfileScreen
 import com.example.serviconnecta.feature.client.ui.reservations.MyReservationsScreen
+import com.example.serviconnecta.feature.client.ui.services.AllServicesScreen
 import com.example.serviconnecta.feature.client.ui.services.ServiceDetailScreen
 import com.example.serviconnecta.feature.client.ui.services.ServicesByCategoryScreen
 import com.example.serviconnecta.feature.client.ui.provider.ProviderDetailScreen
 import com.example.serviconnecta.feature.client.ui.search.SearchScreen
+import com.example.serviconnecta.feature.client.ui.review.WriteReviewScreen
 import com.example.serviconnecta.feature.shared.ui.ChangePasswordScreen
 import com.example.serviconnecta.feature.shared.ui.EditProfileScreen
 
@@ -65,10 +67,11 @@ fun ClientNavGraph(
         }
 
         composable(AppDestination.ClientServicesList.route) {
-            // Services list placeholder
-            EditProfileScreen(
-                userPreferences = userPreferences,
-                onNavigateBack = { navController.navigateUp() }
+            AllServicesScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToServiceDetail = { serviceId ->
+                    navController.navigate(AppDestination.ClientServiceDetail.createRoute(serviceId))
+                }
             )
         }
 
@@ -189,10 +192,10 @@ fun ClientNavGraph(
         composable(
             route = AppDestination.ClientWriteReview.route,
             arguments = listOf(navArgument("bookingId") { type = NavType.StringType })
-        ) {
-            // Review screen placeholder
-            EditProfileScreen(
-                userPreferences = userPreferences,
+        ) { backStackEntry ->
+            val bookingId = backStackEntry.arguments?.getString("bookingId") ?: return@composable
+            WriteReviewScreen(
+                bookingId = bookingId,
                 onNavigateBack = { navController.navigateUp() }
             )
         }

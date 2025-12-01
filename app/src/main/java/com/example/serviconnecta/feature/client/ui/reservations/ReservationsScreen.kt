@@ -183,9 +183,10 @@ private fun BookingCard(
                         .background(
                             when (booking.status) {
                                 BookingStatus.PENDING -> Color(0xFFFFF3CD)
+                                BookingStatus.CONFIRMED -> Color(0xFFCCE5FF)
+                                BookingStatus.IN_PROGRESS -> Color(0xFFE0E0FF)
                                 BookingStatus.COMPLETED -> Color(0xFFD4EDDA)
                                 BookingStatus.CANCELLED -> Color(0xFFF8D7DA)
-                                else -> Color.LightGray
                             },
                             RoundedCornerShape(4.dp)
                         )
@@ -194,16 +195,18 @@ private fun BookingCard(
                     Text(
                         when (booking.status) {
                             BookingStatus.PENDING -> "Pendiente"
+                            BookingStatus.CONFIRMED -> "Confirmado"
+                            BookingStatus.IN_PROGRESS -> "En Progreso"
                             BookingStatus.COMPLETED -> "Completado"
                             BookingStatus.CANCELLED -> "Cancelado"
-                            else -> "Desconocido"
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = when (booking.status) {
                             BookingStatus.PENDING -> Color(0xFF856404)
+                            BookingStatus.CONFIRMED -> Color(0xFF004085)
+                            BookingStatus.IN_PROGRESS -> Color(0xFF3D3D85)
                             BookingStatus.COMPLETED -> Color(0xFF155724)
                             BookingStatus.CANCELLED -> Color(0xFF721C24)
-                            else -> Color.Gray
                         }
                     )
                 }
