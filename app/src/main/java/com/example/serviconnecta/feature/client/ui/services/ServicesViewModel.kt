@@ -19,7 +19,7 @@ data class ServicesUiState(
 )
 
 class ServicesViewModel(
-    private val repository: MockClientRepository = MockClientRepository()
+    private val repository: MockClientRepository = MockClientRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ServicesUiState())
