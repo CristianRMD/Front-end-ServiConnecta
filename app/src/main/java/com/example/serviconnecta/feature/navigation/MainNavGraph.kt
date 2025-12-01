@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,7 +15,9 @@ import com.example.serviconnecta.feature.auth.ui.login.LoginViewModel
 import com.example.serviconnecta.feature.auth.ui.navigation.AuthNavGraph
 import com.example.serviconnecta.feature.auth.ui.register.RegistrationViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainNavGraph(
@@ -27,6 +30,7 @@ fun MainNavGraph(
 ) {
     val rootNavController = rememberNavController()
     var currentAccountType by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     // Observar el account_type guardado
     LaunchedEffect(Unit) {
@@ -66,12 +70,17 @@ fun MainNavGraph(
                 navController = workerNavController,
                 userPreferences = userPreferences,
                 onLogout = {
-                    kotlinx.coroutines.runBlocking {
+                    coroutineScope.launch {
+                        // 1. Limpiar sesión
                         onClearSession()
-                    }
-                    currentAccountType = null
-                    rootNavController.navigate("auth") {
-                        popUpTo(0) { inclusive = true }
+
+                        // 2. Esperar a que el DataStore confirme la limpieza
+                        accountTypeFlow.first { it == null }
+
+                        // 3. Navegar a login
+                        rootNavController.navigate("auth") {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 }
             )
@@ -83,12 +92,17 @@ fun MainNavGraph(
                 navController = clientNavController,
                 userPreferences = userPreferences,
                 onLogout = {
-                    kotlinx.coroutines.runBlocking {
+                    coroutineScope.launch {
+                        // 1. Limpiar sesión
                         onClearSession()
-                    }
-                    currentAccountType = null
-                    rootNavController.navigate("auth") {
-                        popUpTo(0) { inclusive = true }
+
+                        // 2. Esperar a que el DataStore confirme la limpieza
+                        accountTypeFlow.first { it == null }
+
+                        // 3. Navegar a login
+                        rootNavController.navigate("auth") {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 }
             )
